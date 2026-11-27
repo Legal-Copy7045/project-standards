@@ -77,7 +77,8 @@ The job itself is skipped for drafts, so a draft runs nothing.
 - The private-terms list (`PRIVACY_DENYLIST`) lives in an Actions environment named `privacy` (deployment branches:
   `main` only) and is checked on push to `main` only, so PR code never sees it. Reusable job:
   `privacy.yml` (`denylist: true`).
-- gitleaks: the PR's commits in `quick`; the whole history weekly. Reusable: `gitleaks.yml`. Synthetic test values are
+- gitleaks: the PR's commits in `quick`; the whole history weekly. Reusable: `gitleaks.yml` (image pinned by digest;
+  `.gitleaks.toml` always read from the default branch, so a PR cannot allowlist its own leak). Synthetic test values are
   allowed one by one in `.gitleaks.toml`, never by whole file.
 - Visibility does not change this: a private repository runs the same checks, so it can be made public at any time.
 
@@ -85,6 +86,8 @@ The job itself is skipped for drafts, so a draft runs nothing.
 
 - Actions pinned to a full commit SHA with a `# vX.Y.Z` comment (Dependabot keeps them current). Reusable workflows from
   this repository likewise: `uses: Legal-Copy7045/project-standards/.github/workflows/<name>.yml@<sha> # v1.0.0`.
+- Container images run from workflow steps (Trivy, gitleaks, ...) pinned as `tag@sha256:<digest>` and listed in
+  `.github/upstreams.yaml` so the weekly maintenance updates them.
 - Python requirements pinned (hashes where the project already uses them); `npm ci` with a lockfile where one exists.
 - Dependency audits (pip-audit, npm audit --omit=dev high+): in `quick` when a lockfile or requirements file changes,
   and weekly.

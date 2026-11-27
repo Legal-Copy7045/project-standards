@@ -1,3 +1,5 @@
 # Versions Dependabot doesn't track (STANDARD.md 5): the weekly maintenance session checks each for a newer release.
 # source: pypi:<name> | npm:<name> | github:<owner>/<repo> (release tags) | docker:<image>
 - {name: ESPHome, current: "2026.11.0", source: "pypi:esphome", where: ".github/workflows/ci.yml (ESPHOME_VERSION)"}
+# A container image run from a workflow step: pin it as tag@sha256:<digest> and list it here, e.g.
+# - {name: Trivy, current: "0.62.1", source: "github:aquasecurity/trivy", where: ".github/workflows/ci.yml (image digest)"}

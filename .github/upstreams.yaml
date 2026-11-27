@@ -1,0 +1,2 @@
+# Versions Dependabot doesn't track (STANDARD.md 5); checked by the weekly maintenance session.
+- {name: gitleaks image, current: "v8.24.3", source: "github:gitleaks/gitleaks", where: ".github/workflows/gitleaks.yml (input image: tag@sha256 digest)"}

@@ -1,11 +1,16 @@
 # Reusable: gitleaks secret scan. Pull requests: the PR's commits. full-history: true (weekly): every commit.
 # Allow synthetic test values one by one in .gitleaks.toml, never by whole file. On findings, the step summary lists
 # rule, file, line and commit (the secret itself is redacted) and a redacted JSON report is kept for 3 days.
+# The image is pinned by digest (input `image`); .gitleaks.toml is always read from the default branch.
 name: Secret scan
 on:
   workflow_call:
     inputs:
       full-history: {type: boolean, default: false}
+      image:
+        type: string
+        default: "ghcr.io/gitleaks/gitleaks:v8.24.3@sha256:e1b35e12a8c6fa8901f060459cfb6b2fc4c484d3afbe3b029733a3bbfab07055"
+        description: "the gitleaks image, pinned by digest (tag@sha256:...)"
 permissions:
   contents: read
 jobs:
@@ -18,12 +23,20 @@ jobs:
       - name: gitleaks
         env:
           RANGE: ${{ !inputs.full-history && github.event_name == 'pull_request' && format('{0}..{1}', github.event.pull_request.base.sha, github.event.pull_request.head.sha) || '' }}
+          IMAGE: ${{ inputs.image }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
-          cfg=(); [ -f .gitleaks.toml ] && cfg=(-c /repo/.gitleaks.toml)
+          case "$IMAGE" in *@sha256:*) ;; *) echo "::error::image must be pinned by digest (tag@sha256:...)"; exit 1 ;; esac
+          # The allowlist always comes from the default branch, so a pull request can't allowlist its own leak.
+          cfg=()
+          if git show "origin/${DEFAULT_BRANCH}:.gitleaks.toml" > "$RUNNER_TEMP/gitleaks.toml" 2>/dev/null; then
+            cfg=(-c /config/gitleaks.toml)
+          fi
           opts=(); [ -n "$RANGE" ] && opts=(--log-opts="$RANGE")
-          mkdir -p gitleaks-report
-          docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.24.3 git /repo --redact --no-banner \
-            --report-format json --report-path /repo/gitleaks-report/findings.json "${cfg[@]}" "${opts[@]}"
+          mkdir -p gitleaks-report && chmod 777 gitleaks-report
+          docker run --rm -v "$PWD:/repo:ro" -v "$RUNNER_TEMP/gitleaks.toml:/config/gitleaks.toml:ro" \
+            -v "$PWD/gitleaks-report:/report" "$IMAGE" git /repo --redact --no-banner \
+            --report-format json --report-path /report/findings.json "${cfg[@]}" "${opts[@]}"
       # Where the findings are (rule, file, line, commit; never the secret), so the project can fix or allowlist them.
       - name: Findings (summary)
         if: failure()
