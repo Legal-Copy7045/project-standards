@@ -26,14 +26,14 @@ recorded under `exceptions:` in `.github/standard.yaml` with its reason.
 - CI: where the existing workflow falls short, start from `~/.claude/standards/templates/.github/workflows/ci.yml`; move the project's existing jobs into it
   (keep job names that people know; `ci-result` becomes the only required check). Copy `changes.py`,
   `check_versions.py`, `dependabot.yml`, `codeql.yml` from `templates/` and fill `changes.yaml`, `versions.yaml`.
-  Reusable workflows are referenced by the commit SHA of the standards tag (`git -C ~/.claude/standards rev-parse
-  v<version>`), with a `# v<version>` comment.
+  Reusable workflows are referenced by the commit SHA of the standards tag
+  (`git ls-remote https://github.com/Legal-Copy7045/project-standards 'refs/tags/v*'`), with a `# v<version>` comment.
 - Regression: copy `regression-kit/` into `regression/` for a new project; an existing one keeps its stage runners
   (and any more advanced report or tooling), vendors `standard.py` for whatever it lacks, writes `profile.yaml`, renames stages to the standard names (keeping every existing ID and
   prefix: never renumber), and makes `run.py` answer the standard commands by delegating to `standard.py`.
   Move the project's regression/walkthrough/full-check skill files out of `.claude/skills/` (the global skills replace
   them); project-specific instructions go into `profile.yaml` or `regression/README.md`.
-- Write `.github/standard.yaml` (`standard: <version>`, `exceptions:`).
+- Write `.github/standard.yaml` (`standard: <version>`, `beyond:`, `exceptions:`).
 - Bump VERSION and CHANGELOG. Run `python3 regression/run.py check`, then mark the PR ready.
 
 ## 3. After merge
