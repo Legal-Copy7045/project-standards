@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.0] - 2026-11-27
+### Added
+- watchgrapher and open-pitmaster in the weekly maintenance (Sunday 03:47 UTC CI slot).
+
 ## [1.0.0] - 2026-11-27
 ### Added
 - The project standard (STANDARD.md): one CI profile for public and private repositories, releases from a merged
