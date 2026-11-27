@@ -1,5 +1,6 @@
 # Reusable: gitleaks secret scan. Pull requests: the PR's commits. full-history: true (weekly): every commit.
-# Allow synthetic test values one by one in .gitleaks.toml, never by whole file.
+# Allow synthetic test values one by one in .gitleaks.toml, never by whole file. On findings, the step summary lists
+# rule, file, line and commit (the secret itself is redacted) and a redacted JSON report is kept for 3 days.
 name: Secret scan
 on:
   workflow_call:
@@ -20,4 +21,22 @@ jobs:
         run: |
           cfg=(); [ -f .gitleaks.toml ] && cfg=(-c /repo/.gitleaks.toml)
           opts=(); [ -n "$RANGE" ] && opts=(--log-opts="$RANGE")
-          docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.24.3 git /repo --redact --no-banner "${cfg[@]}" "${opts[@]}"
+          mkdir -p gitleaks-report
+          docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.24.3 git /repo --redact --no-banner \
+            --report-format json --report-path /repo/gitleaks-report/findings.json "${cfg[@]}" "${opts[@]}"
+      # Where the findings are (rule, file, line, commit; never the secret), so the project can fix or allowlist them.
+      - name: Findings (summary)
+        if: failure()
+        run: |
+          python3 - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
+          import json, pathlib
+          p = pathlib.Path("gitleaks-report/findings.json")
+          rows = json.loads(p.read_text()) if p.is_file() and p.stat().st_size else []
+          print(f"## gitleaks: {len(rows)} finding(s)")
+          print("| Rule | File | Line | Commit |\n|---|---|---|---|")
+          for r in rows[:200]:
+              print(f"| {r.get('RuleID')} | {r.get('File')} | {r.get('StartLine')} | {str(r.get('Commit', ''))[:12]} |")
+          PY
+      - if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with: {name: gitleaks-report, path: gitleaks-report/, if-no-files-found: ignore, retention-days: 3}
