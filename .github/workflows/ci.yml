@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with: {persist-credentials: false}
-      - run: pip install -q pytest pyyaml && bash tests/run.sh
+      - run: pip install -q pytest pyyaml && bash tests/run.sh && python3 .github/scripts/check_versions.py
   privacy:
     if: github.event_name != 'push' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
     uses: ./.github/workflows/privacy.yml
@@ -30,9 +30,16 @@ jobs:
     uses: ./.github/workflows/privacy.yml
     with: {denylist: true}
     secrets: inherit
+  release:
+    if: github.event_name == 'push'
+    needs: [privacy-denylist]
+    permissions:
+      contents: write
+    uses: ./.github/workflows/release.yml
+    with: {title: "Project standard"}
   ci-result:
     if: always() && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
-    needs: [tests, privacy, privacy-denylist]
+    needs: [tests, privacy, privacy-denylist, release]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
