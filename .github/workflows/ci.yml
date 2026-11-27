@@ -32,7 +32,6 @@ jobs:
     secrets: inherit
   release:
     if: github.event_name == 'push'
-    needs: [privacy-denylist]
     permissions:
       contents: write
     uses: ./.github/workflows/release.yml
