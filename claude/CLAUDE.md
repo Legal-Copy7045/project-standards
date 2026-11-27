@@ -21,7 +21,9 @@ that already has a more advanced version of one keeps it (listed under `beyond:`
 - Every project keeps `regression/` per the standard (profile.yaml, run.py, standard.py, ids, catalogue, claims,
   manual, RUNS.md, WALKTHROUGHS.md, published.yaml). `/regression`, `/walkthrough` and `/full-check` are global skills;
   `/adopt-standard` sets a project up or brings it to the current standard.
-- A run fixes no product code; every regression includes the security audit; ask the owner before fixing findings.
+- A run fixes no product code; every regression includes the security audit; fix every finding with a clear fix in the
+  next release unasked; ask the owner only when a fix is uncertain, weakens security, changes a legal or governance
+  rule, or merges or removes pages.
 
 ## Weekly maintenance (section 5)
 - A Monday scheduled session runs `/weekly-maintenance` across all projects: maintenance releases, upstream pins,

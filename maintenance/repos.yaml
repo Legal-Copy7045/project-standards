@@ -14,7 +14,6 @@
   deploy: "HACS offers the integration; the mirror updates with git pull + npm install."
 - repo: Legal-Copy7045/HOA-Portal
   type: [server]
-  private: true
   deploy: "The server moves to the new tag on its next update (update-portal.sh)."
 - repo: Legal-Copy7045/watchgrapher
   type: [firmware, desktop-app]
