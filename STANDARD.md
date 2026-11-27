@@ -6,8 +6,15 @@ follow the same rules; the only differences follow automatically from the reposi
 apply). Standard version: see `VERSION`. Sections: 1 CI, 2 versions, releases and deployment, 3 regression, walkthrough
 and full check, 4 working in a Claude session, 5 weekly maintenance and the owner's weekly report.
 
-A project records the standard version it follows in `.github/standard.yaml` (`standard: 1.0.0`) and adapts nothing
-silently: a deliberate difference is written under `exceptions:` there, with the reason.
+**A baseline, not a ceiling.** Every rule here is a default, template, baseline or concept that every project
+must have. Where a project already has a more advanced version of the same concept (a richer regression runner or
+report, a stricter privacy guard, signed and attested releases, finer change detection), it **keeps its own**, as
+long as it still does everything the baseline does and answers the same commands and files, so the global skills and
+the weekly maintenance work everywhere. Templates are starting points to adapt, not files to overwrite with.
+
+A project records the standard version it follows in `.github/standard.yaml` (`standard: 1.1.0`): under `beyond:`
+what it does better than the baseline (kept on purpose), and under `exceptions:` anything it does differently or
+not at all, each with the reason. Nothing changes silently.
 
 ---
 
@@ -137,7 +144,8 @@ Secrets for signing or deploying live in a GitHub environment limited to `main`.
 
 Every project keeps `regression/`. The stages differ per project; the commands, files and formats are the same.
 The starter kit (`regression-kit/`) gives a new project all of it; an existing project keeps its own stage runners and
-uses the kit's `standard.py` for everything after the stages.
+uses the kit's `standard.py` for everything after the stages, unless it has more advanced tooling of its own that
+answers the same commands (record it under `beyond:`).
 
 ### 3.1 Files
 

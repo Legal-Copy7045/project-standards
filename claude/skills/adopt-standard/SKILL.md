@@ -10,25 +10,30 @@ github.com/Legal-Copy7045/project-standards; `README.md` there lists every file)
 
 ## 1. Gap list first (no changes yet)
 
-Compare the repository with each section of STANDARD.md and write a short gap list: CI triggers and jobs, `changes`
+The standard is a **baseline, not a ceiling**: its templates and kit are defaults and concepts every project must
+have. Where this repository already has a more advanced version of the same concept, keep it (adapt it to answer the
+standard's commands and files if needed) and list it under `beyond:` in `.github/standard.yaml`; never replace better
+work with a template.
+
+Compare the repository with each section of STANDARD.md and write a short gap list (missing or below baseline only): CI triggers and jobs, `changes`
 groups, `ci-result`, pinning and permissions, privacy and gitleaks, CodeQL, Dependabot, VERSION/CHANGELOG/versions
 check, release and deployment path for the project's type (section 2.3), the regression contract (section 3), CLAUDE.md
-size. Keep what already meets the standard; a project-specific difference that is right stays, recorded under
-`exceptions:` in `.github/standard.yaml` with its reason.
+size. Keep what already meets or exceeds the standard (`beyond:`); a project-specific difference that is right stays,
+recorded under `exceptions:` in `.github/standard.yaml` with its reason.
 
 ## 2. Apply, in one draft PR
 
-- CI: start from `~/.claude/standards/templates/.github/workflows/ci.yml`; move the project's existing jobs into it
+- CI: where the existing workflow falls short, start from `~/.claude/standards/templates/.github/workflows/ci.yml`; move the project's existing jobs into it
   (keep job names that people know; `ci-result` becomes the only required check). Copy `changes.py`,
   `check_versions.py`, `dependabot.yml`, `codeql.yml` from `templates/` and fill `changes.yaml`, `versions.yaml`.
-  Reusable workflows are referenced by the commit SHA of the standards tag (`git -C ~/.claude/standards rev-parse
-  v<version>`), with a `# v<version>` comment.
-- Regression: copy `regression-kit/` into `regression/` for a new project; an existing one keeps its stage runners,
-  vendors `standard.py`, writes `profile.yaml`, renames stages to the standard names (keeping every existing ID and
+  Reusable workflows are referenced by the commit SHA of the standards tag
+  (`git ls-remote https://github.com/Legal-Copy7045/project-standards 'refs/tags/v*'`), with a `# v<version>` comment.
+- Regression: copy `regression-kit/` into `regression/` for a new project; an existing one keeps its stage runners
+  (and any more advanced report or tooling), vendors `standard.py` for whatever it lacks, writes `profile.yaml`, renames stages to the standard names (keeping every existing ID and
   prefix: never renumber), and makes `run.py` answer the standard commands by delegating to `standard.py`.
   Move the project's regression/walkthrough/full-check skill files out of `.claude/skills/` (the global skills replace
   them); project-specific instructions go into `profile.yaml` or `regression/README.md`.
-- Write `.github/standard.yaml` (`standard: <version>`, `exceptions:`).
+- Write `.github/standard.yaml` (`standard: <version>`, `beyond:`, `exceptions:`).
 - Bump VERSION and CHANGELOG. Run `python3 regression/run.py check`, then mark the PR ready.
 
 ## 3. After merge

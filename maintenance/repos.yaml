@@ -16,3 +16,9 @@
   type: [server]
   private: true
   deploy: "The server moves to the new tag on its next update (update-portal.sh)."
+- repo: Legal-Copy7045/watchgrapher
+  type: [firmware, desktop-app]
+  deploy: "The pocket device and the desktop app pick up the new release."
+- repo: Legal-Copy7045/open-pitmaster
+  type: [worker]
+  deploy: "The Worker is deployed from the release tag with wrangler deploy (by hand)."
