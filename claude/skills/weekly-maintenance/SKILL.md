@@ -20,7 +20,7 @@ Attach each with `add_repo` (`access: push`) and clone shallowly (depth 50). The
 - **Upstreams**: `python3 ~/.claude/standards/tools/upstreams.py <clone>` (versions Dependabot doesn't track).
 - **Release state**: latest `v*` tag vs `main`; commits on main since the tag (dependency merges don't release).
 
-## 2. Act (only these; everything else goes in "needs the owner")
+## 2. Act (these; anything uncertain goes in "needs the owner")
 
 Each change goes through a PR per the standard (draft, `regression/run.py check` where it runs quickly, ready, merge
 when `ci-result` is green). Commit as the owner's no-reply identity; follow each repository's CLAUDE.md privacy rules.
@@ -32,8 +32,10 @@ when `ci-result` is green). Commit as the owner's no-reply identity; follow each
    PATCH bump of `VERSION` (and every place in `.github/versions.yaml`) and a CHANGELOG section with
    `### Dependencies` (and `### Security` for vulnerability fixes). Merging it releases (section 2.2). Skip it when the
    repository already has an open release PR of its own.
-4. **A failing weekly run** caused by an update merged this week: revert that update in a PR (and say so). Any other
-   failure, CodeQL findings, vulnerabilities without a fix: report only, never fix (the owner decides).
+4. **A failing weekly run** caused by an update merged this week: revert that update in a PR (and say so). Other
+   failures and CodeQL findings with a clear fix: fix them in a PR that joins the maintenance release (STANDARD.md
+   3.6). Ask the owner ("Needs you") when the fix is uncertain, weakens security, changes a legal or governance rule
+   or merges or removes pages; vulnerabilities without a fix are reported.
 
 ## 3. Report
 

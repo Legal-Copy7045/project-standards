@@ -6,7 +6,7 @@ description: Run the regression and the walkthrough together as one job - every 
 # /full-check
 
 Read the `regression` and `walkthrough` skills first (`~/.claude/skills/<name>/SKILL.md`); this file only says how
-they interleave. Neither fixes product code. A full check always runs the walkthrough (no skip check) and the full
+they interleave. Neither run fixes product code; clear fixes follow in the next release. A full check always runs the walkthrough (no skip check) and the full
 security audit.
 
 1. **Suite up to date**: regression step 1; commit.
@@ -18,4 +18,5 @@ security audit.
 4. **Both reports**: `run.py report` and `run.py report --walkthrough`; publish both to their `published.yaml` URLs;
    `run.py log --full-check` writes both rows, each naming the other report's link.
 5. **Commit and tell the owner in one message**: regression totals and failures, findings by severity and the claims
-   that did not hold, walkthrough counts and its top three findings, both links.
+   that did not hold, walkthrough counts and its top three findings, both links; then which findings go into the next release without
+   asking and which need the owner's decision (the rule in STANDARD.md 3.6).

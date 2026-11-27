@@ -1,6 +1,6 @@
 ---
 name: walkthrough
-description: Run the project's independent walkthrough of every function on desktop and phone - signs in as every role, records every menu and page with screenshots, runs the automated UX checks, has two fresh reviewers (desktop, phone) write a streamlining report, publishes it and logs it in WALKTHROUGHS.md. Use for "/walkthrough" or a usability or streamlining review. Projects with a UI only. Fixes nothing.
+description: Run the project's independent walkthrough of every function on desktop and phone - signs in as every role, records every menu and page with screenshots, runs the automated UX checks, has two fresh reviewers (desktop, phone) write a streamlining report, publishes it and logs it in WALKTHROUGHS.md. Use for "/walkthrough" or a usability or streamlining review. Projects with a UI only. The run fixes nothing; clear fixes follow in the next release.
 ---
 
 # /walkthrough
@@ -40,4 +40,6 @@ Publish `regression/out/walkthrough.html` privately (icon `layout`), to the `wal
 --walkthrough`, commit the records, push to the working branch.
 
 Tell the owner: roles and page counts, failing UX checks by kind, the findings by group with the three most valuable
-in one sentence each, and the link. Fix nothing.
+in one sentence each, and the link. Then say which findings go into the next release without asking (clear fixes:
+names, layout, tap targets, dead links, long flows with an obvious shortcut) and which need the owner's decision
+(uncertain fixes, merging or removing pages; keep-separate items stay as they are).

@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0] - 2026-11-27
+### Changed
+- Findings (STANDARD.md 3.6, owner defaults, regression/walkthrough/full-check/weekly-maintenance skills): the run
+  stays an independent, read-only check; afterwards every finding with a clear fix goes into the next release without
+  asking. The owner is asked only when a fix is uncertain, weakens a security setting, changes a legal or governance
+  rule, or merges or removes pages. Summaries say which findings will be fixed and which need the owner.
+- HOA-Portal is public; the maintenance list no longer marks it private.
+
+### Fixed
+- regression-kit standard.py 1.2.0: `log` never adds a second row for the same commit (with --full-check, projects
+  that write their own walkthrough row got two).
+
 ## [1.1.0] - 2026-11-27
 ### Changed
 - The standard is a baseline, not a ceiling: a project keeps a more advanced version of any concept and lists it

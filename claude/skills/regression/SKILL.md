@@ -1,6 +1,6 @@
 ---
 name: regression
-description: Run the project's full regression - bring the suite up to date, run every stage in regression/, a security audit by three fresh read-only reviewers (bugs, claims, exposure), publish the private report and log the run. Use for "/regression", "run the full regression" or a health check after a set of features. "/regression full" forces a full whole-codebase audit. Fixes no product code. Not for ordinary changes (CI covers those).
+description: Run the project's full regression - bring the suite up to date, run every stage in regression/, a security audit by three fresh read-only reviewers (bugs, claims, exposure), publish the private report and log the run. Use for "/regression", "run the full regression" or a health check after a set of features. "/regression full" forces a full whole-codebase audit. The run fixes no product code; clear fixes follow in the next release. Not for ordinary changes (CI covers those).
 ---
 
 # /regression
@@ -9,7 +9,8 @@ Standard: `~/.claude/standards/STANDARD.md` section 3. The project's specifics (
 host variables, time zone) are in `regression/profile.yaml`; read it and `regression/README.md` first. If the project
 has no `regression/profile.yaml`, run `/adopt-standard` first and say so.
 
-The owner usually reads the report later: finish every step, leave nothing waiting. **Fix nothing in product code.**
+The owner usually reads the report later: finish every step, leave nothing waiting. **The run fixes nothing in product
+code** (it is an independent check); clear fixes go into the next release afterwards (step 5).
 
 ## 1. Bring the suite up to date (commit before the stages start)
 
@@ -53,4 +54,6 @@ URL there. Then `python3 regression/run.py log`.
 Commit only suite records (`regression/` tests, ids, catalogue, claims, manual, RUNS.md, published.yaml) and push to
 the working branch. Tell the owner from `python3 regression/run.py summary`: totals per stage, failing check IDs,
 findings by severity (verified or not), audit depth (full or delta), what could not run and why, the report link.
-Propose fixes; make none unless asked.
+Then sort the findings and failures: those with a clear fix go into the next release without asking (say which);
+those whose fix is uncertain, weakens a security setting, changes a legal or governance rule, or merges or removes
+pages need the owner's decision (list them with a recommendation). Make the fixes after the run, never during it.
