@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.2.1] - 2026-11-27
+### Fixed
+- gitleaks.yml: findings are listed in the step summary (rule, file, line, commit; secrets redacted) with a redacted
+  JSON report kept 3 days, instead of only "leaks found: N".
+
 ## [1.2.0] - 2026-11-27
 ### Changed
 - Findings (STANDARD.md 3.6, owner defaults, regression/walkthrough/full-check/weekly-maintenance skills): the run
