@@ -25,6 +25,10 @@ jobs:
   privacy:
     if: github.event_name != 'push' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
     uses: ./.github/workflows/privacy.yml
+  secrets:
+    if: github.event_name != 'push' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
+    uses: ./.github/workflows/gitleaks.yml
+    with: {full-history: "${{ github.event_name != 'pull_request' }}"}
   privacy-denylist:
     if: github.event_name == 'push'
     uses: ./.github/workflows/privacy.yml
@@ -38,7 +42,7 @@ jobs:
     with: {title: "Project standard"}
   ci-result:
     if: always() && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
-    needs: [tests, privacy, privacy-denylist, release]
+    needs: [tests, privacy, secrets, privacy-denylist, release]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:

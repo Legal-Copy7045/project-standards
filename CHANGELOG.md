@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.2] - 2026-11-27
+### Security
+- gitleaks.yml: the image is pinned by digest (new input `image`, must be tag@sha256:...), and `.gitleaks.toml` is
+  always read from the default branch, so a pull request can't allowlist its own leak; the checkout is mounted read-only.
+- STANDARD.md 1.5: container images run from workflow steps are pinned by digest and listed in `.github/upstreams.yaml`.
+
 ## [1.2.1] - 2026-11-27
 ### Fixed
 - gitleaks.yml: findings are listed in the step summary (rule, file, line, commit; secrets redacted) with a redacted
