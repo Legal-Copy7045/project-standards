@@ -1,6 +1,10 @@
 # Changelog
 
 ## [1.1.0] - 2026-11-27
+### Changed
+- The standard is a baseline, not a ceiling: a project keeps a more advanced version of any concept and lists it
+  under `beyond:` in .github/standard.yaml (STANDARD.md, adopt-standard, owner defaults, standard.yaml template).
+
 ### Added
 - watchgrapher and open-pitmaster in the weekly maintenance (Sunday 03:47 UTC CI slot).
 

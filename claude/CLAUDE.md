@@ -1,7 +1,8 @@
 # Owner's defaults for every project (a project's own CLAUDE.md wins where they differ)
 
 The full standard is `~/.claude/standards/STANDARD.md` (from github.com/Legal-Copy7045/project-standards). Read the
-section a task needs; the essentials:
+section a task needs. It is a baseline, not a ceiling: every project must have each concept, and a project
+that already has a more advanced version of one keeps it (listed under `beyond:` in .github/standard.yaml). The essentials:
 
 ## Build pipeline (STANDARD.md section 1)
 - One CI workflow: pull requests only and never drafts; push to main only releases (when VERSION has no tag); a weekly
