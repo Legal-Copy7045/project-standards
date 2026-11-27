@@ -1,0 +1,114 @@
+# CI per the project standard (github.com/Legal-Copy7045/project-standards, STANDARD.md section 1).
+#  - pull request: nothing while a draft; then the quick checks, and each slow group only when its files changed;
+#  - push to main: the private-terms check, and the release path when VERSION has no tag yet (nothing is re-tested);
+#  - weekly and by hand: everything, full matrix, full-history secret scan, audits; publishes nothing
+#    (workflow_dispatch with release: true on main retries a release).
+# ci-result is the only required check. Replace STANDARDS_SHA with the commit of the standards tag named after it.
+name: CI
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 1 * * 0"        # Sunday: this project's slot from STANDARD.md 1.6
+  workflow_dispatch:
+    inputs:
+      release: {type: boolean, default: false, description: "Release VERSION if it has no tag yet (main only)"}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  changes:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      release: ${{ steps.c.outputs.release }}
+      full: ${{ steps.c.outputs.full }}
+      app: ${{ steps.c.outputs.app }}              # one output per group in .github/changes.yaml
+      lockfiles: ${{ steps.c.outputs.lockfiles }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {fetch-depth: 0, persist-credentials: false}
+      - id: c
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+          RELEASE_INPUT: ${{ inputs.release }}
+        run: python3 .github/scripts/changes.py
+
+  quick:
+    needs: changes
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with: {python-version: "3.13", cache: pip}
+      - run: python3 .github/scripts/check_versions.py
+      # lint and the fast unit tests here, e.g.:
+      # - run: pip install -r requirements-dev.txt && ruff check . && pytest -q
+      - name: Dependency audit (lockfiles changed, or weekly)
+        if: needs.changes.outputs.lockfiles == 'true' || needs.changes.outputs.full == 'true'
+        run: echo "pip-audit / npm audit --omit=dev --audit-level=high here"
+
+  privacy:
+    needs: changes
+    if: github.event_name != 'push'
+    uses: Legal-Copy7045/project-standards/.github/workflows/privacy.yml@STANDARDS_SHA # v1.0.0
+
+  privacy-denylist:
+    needs: changes
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.ref_name == 'main')
+    uses: Legal-Copy7045/project-standards/.github/workflows/privacy.yml@STANDARDS_SHA # v1.0.0
+    with: {denylist: true}
+    secrets: inherit
+
+  secrets:
+    needs: changes
+    if: github.event_name != 'push'
+    uses: Legal-Copy7045/project-standards/.github/workflows/gitleaks.yml@STANDARDS_SHA # v1.0.0
+    with: {full-history: "${{ needs.changes.outputs.full == 'true' }}"}
+
+  # Slow groups: one job per group, started only when the group's files changed (or weekly).
+  app:
+    needs: changes
+    if: needs.changes.outputs.app == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {persist-credentials: false}
+      - run: echo "browser tests / image build+scan / firmware build here"
+
+  # Build what the release ships (only on a release run), then publish it.
+  release:
+    needs: [changes, privacy-denylist]
+    if: needs.changes.outputs.release == 'true'
+    permissions:
+      contents: write
+    uses: Legal-Copy7045/project-standards/.github/workflows/release.yml@STANDARDS_SHA # v1.0.0
+    with:
+      title: "Project name"
+      assets: ""
+
+  ci-result:
+    if: always() && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
+    needs: [changes, quick, privacy, privacy-denylist, secrets, app, release]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - env:
+          RESULTS: ${{ toJSON(needs.*.result) }}
+        run: |
+          echo "$RESULTS"
+          if echo "$RESULTS" | grep -qE '"(failure|cancelled)"'; then echo "A needed job failed or was cancelled."; exit 1; fi

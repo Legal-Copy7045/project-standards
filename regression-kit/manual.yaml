@@ -1,0 +1,4 @@
+# What only a person can check. Record results: python3 regression/run.py manual <key> pass|fail --note "..."
+- key: install on a fresh Home Assistant
+  area: install
+  steps: [Install from HACS, Add the integration, Check the entities appear]

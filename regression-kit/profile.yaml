@@ -1,0 +1,48 @@
+# The project's regression profile (standard section 3.1). The global /regression, /walkthrough and /full-check
+# skills read this file; nothing project-specific lives in the skills.
+name: Example Project
+type: ha-integration        # ha-integration | firmware | ha-app | server | magicmirror | worker | library
+ui: true                    # false: no walkthrough
+report_tz: Europe/London
+version_file: VERSION
+security_tools: "bandit -q -r src, pip-audit -r requirements.txt, npm audit --omit=dev --audit-level=high"
+roles: [admin, member, read-only]
+
+stages:                     # standard names: ci, unit, page, device, live, manual (+ walkthrough); extras allowed
+  ci:
+    prefix: CI
+    commands:
+      - {key: ruff, run: "ruff check ."}
+      - {key: versions, run: "python3 .github/scripts/check_versions.py"}
+      - {key: privacy, run: "python3 .github/scripts/privacy_guard.py"}
+      - {key: bandit, run: "bandit -q -r src"}
+      - {key: pip-audit, run: "pip-audit -r requirements.txt"}
+  unit:
+    prefix: UNIT
+    commands:
+      - {key: pytest, run: "python3 -m pytest -q -p no:cacheprovider --junitxml={junit}", junit: true}
+  page:
+    prefix: PAGE
+    commands:
+      - {key: pages, run: "node regression/page/run.mjs --junit {junit}", junit: true}
+  live:
+    prefix: LIVE
+    env: [HA_URL]           # read-only checks; skipped (exit 77) when the host isn't reachable from the session
+    commands:
+      - {key: release, run: "python3 regression/live.py", skip_exit: 77}
+  manual:
+    prefix: MAN
+  walkthrough:
+    prefix: WALK
+    commands:
+      - {key: crawl, run: "node regression/walkthrough.mjs"}   # writes out/walkthrough.json + walkthrough-checks.json
+
+walkthrough:
+  ui_paths: ['^web/', '^frontend/', '^templates/', '^static/']
+
+reviewers:                  # one or two lines each: where this project's risk lives
+  bugs: "Risky paths: authentication, the API's authorization on every route, uploads, backup and restore."
+  claims: "Claims are in SECURITY.md, README.md and docs/security.md (see claims.yaml)."
+  exposure: "Deployment surface: Dockerfile, deploy/, .github/workflows, outbound lookups."
+  desktop: ""
+  phone: ""

@@ -1,0 +1,7 @@
+# Which slow CI groups a pull request starts (STANDARD.md 1.2). Regexes over changed paths.
+ignore: ['^docs/', '\.md$', '^regression/', '^\.claude/', '^LICENSE$']   # start nothing slow
+shared: ['^\.github/workflows/', '^\.github/scripts/']                  # start every group
+groups:
+  app: ['^src/', '^tests/']
+  lockfiles: ['requirements.*\.txt$', 'package-lock\.json$', 'pyproject\.toml$']
+# A changed file that matches nothing above starts every group (safe default).

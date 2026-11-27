@@ -1,0 +1,5 @@
+# Every other place the version lives; check_versions.py checks each equals VERSION (STANDARD.md 2.1).
+- {file: package.json, json: version}
+# - {file: custom_components/example/manifest.json, json: version}
+# - {file: app/config.yaml, yaml: version}
+# - {file: firmware/version.h, regex: 'FW_VERSION "([^"]+)"'}

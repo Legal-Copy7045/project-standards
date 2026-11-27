@@ -1,0 +1,17 @@
+# Weekly on Sunday, one grouped PR per ecosystem for minor and patch updates (they merge themselves when ci-result
+# passes); each major update on its own PR for the weekly maintenance session to judge. Security updates arrive as
+# soon as an advisory is published. Add one block per ecosystem the project uses (pip, npm, docker, docker-compose).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: {interval: weekly, day: sunday, time: "00:30"}
+    open-pull-requests-limit: 3
+    groups:
+      actions: {patterns: ["*"], update-types: [minor, patch]}
+  - package-ecosystem: pip
+    directory: /
+    schedule: {interval: weekly, day: sunday, time: "00:30"}
+    open-pull-requests-limit: 3
+    groups:
+      python: {patterns: ["*"], update-types: [minor, patch]}

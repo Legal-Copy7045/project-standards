@@ -1,0 +1,5 @@
+# Every security and privacy claim the project makes (standard section 3.4). code: globs of the files that keep it.
+- id: CLM-001
+  claim: Only signed-in users can read any data.
+  where: [SECURITY.md]
+  code: ["src/auth.py", "src/api/*.py"]

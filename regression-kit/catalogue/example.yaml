@@ -1,0 +1,4 @@
+# Feature -> the checks that cover it. match: regexes over "<stage>:<check key>".
+- feature: Sign-in and roles
+  match: ['^unit:pytest:tests\.test_auth::', '^page:pages:.*sign-in']
+  manual: [MAN-0001]

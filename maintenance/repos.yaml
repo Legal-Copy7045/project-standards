@@ -1,0 +1,18 @@
+# Repositories the weekly maintenance session covers (STANDARD.md section 5). type: STANDARD.md 2.3.
+# deploy: what a release means for the owner (shown in the report when a maintenance release is cut).
+- repo: Legal-Copy7045/gravity-controller
+  type: [firmware, ha-integration]
+  deploy: "Devices offer the new firmware as an update; HACS offers the integration."
+- repo: Legal-Copy7045/Magic-bHAnds
+  type: [firmware, ha-integration]
+  deploy: "Devices offer the new firmware as an update; HACS offers the integration."
+- repo: Legal-Copy7045/home-inventory
+  type: [ha-app, ha-integration]
+  deploy: "Home Assistant offers the App update; HACS offers the integration."
+- repo: Legal-Copy7045/MMM-KiaAccess
+  type: [ha-integration, magicmirror]
+  deploy: "HACS offers the integration; the mirror updates with git pull + npm install."
+- repo: Legal-Copy7045/HOA-Portal
+  type: [server]
+  private: true
+  deploy: "The server moves to the new tag on its next update (update-portal.sh)."

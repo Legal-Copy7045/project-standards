@@ -1,0 +1,28 @@
+# Reusable: Dependabot pull requests merge themselves (squash) once ci-result passes, unless one of the updates is a
+# new major version (left for the weekly maintenance session to judge). Reads the update types from Dependabot's own
+# commit message, so no third-party action is needed. Needs "Allow auto-merge" on and ci-result required on main.
+# The caller grants contents: write and pull-requests: write.
+name: Dependabot auto-merge
+on:
+  workflow_call:
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  automerge:
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.html_url }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          msg="$(gh api "repos/$REPO/commits/$SHA" --jq .commit.message)"
+          if grep -q 'update-type: version-update:semver-major' <<< "$msg"; then
+            gh pr edit "$PR" --add-label "major-update" || true
+            echo "A major update: left for review."; exit 0
+          fi
+          gh pr merge "$PR" --auto --squash

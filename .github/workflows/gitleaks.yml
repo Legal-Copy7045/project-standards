@@ -1,0 +1,23 @@
+# Reusable: gitleaks secret scan. Pull requests: the PR's commits. full-history: true (weekly): every commit.
+# Allow synthetic test values one by one in .gitleaks.toml, never by whole file.
+name: Secret scan
+on:
+  workflow_call:
+    inputs:
+      full-history: {type: boolean, default: false}
+permissions:
+  contents: read
+jobs:
+  gitleaks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {fetch-depth: 0, persist-credentials: false}
+      - name: gitleaks
+        env:
+          RANGE: ${{ !inputs.full-history && github.event_name == 'pull_request' && format('{0}..{1}', github.event.pull_request.base.sha, github.event.pull_request.head.sha) || '' }}
+        run: |
+          cfg=(); [ -f .gitleaks.toml ] && cfg=(-c /repo/.gitleaks.toml)
+          opts=(); [ -n "$RANGE" ] && opts=(--log-opts="$RANGE")
+          docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.24.3 git /repo --redact --no-banner "${cfg[@]}" "${opts[@]}"

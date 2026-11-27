@@ -1,0 +1,49 @@
+# Reusable: the release path. Runs only for a commit on the default branch whose VERSION has no v<VERSION> tag:
+# creates the tag and the GitHub Release "<title> <VERSION>" with that version's CHANGELOG.md section as notes and the
+# files matching `assets` (optionally from the caller run's artifact). A suffix (1.2.0-beta.1) makes a pre-release.
+# The caller grants `contents: write` (and id-token/attestations if it attests).
+name: Release
+on:
+  workflow_call:
+    inputs:
+      title: {type: string, required: true}
+      artifact: {type: string, default: "", description: "artifact of this run to download into dist/ first"}
+      assets: {type: string, default: "", description: "newline-separated globs of files to attach"}
+    outputs:
+      created: {value: "${{ jobs.release.outputs.created }}"}
+      version: {value: "${{ jobs.release.outputs.version }}"}
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      created: ${{ steps.rel.outputs.created }}
+      version: ${{ steps.rel.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {fetch-depth: 0, persist-credentials: false}
+      - if: inputs.artifact != ''
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with: {name: "${{ inputs.artifact }}", path: dist}
+      - id: rel
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: ${{ inputs.title }}
+          ASSETS: ${{ inputs.assets }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor "$GITHUB_SHA" "origin/$DEFAULT_BRANCH" || { echo "::error::$GITHUB_SHA is not on $DEFAULT_BRANCH"; exit 1; }
+          v="$(tr -d '[:space:]' < VERSION)"; tag="v$v"
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null || gh release view "$tag" >/dev/null 2>&1; then
+            echo "$tag already released"; echo "created=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          python3 .github/scripts/release_notes.py "$v" > "$RUNNER_TEMP/notes.md"
+          args=(--target "$GITHUB_SHA" --title "$TITLE $v" --notes-file "$RUNNER_TEMP/notes.md")
+          case "$v" in *-*) args+=(--prerelease) ;; esac
+          files=(); while IFS= read -r g; do [ -n "$g" ] && for f in $g; do [ -f "$f" ] && files+=("$f"); done; done <<< "$ASSETS"
+          gh release create "$tag" "${args[@]}" "${files[@]}"
+          echo "created=true" >> "$GITHUB_OUTPUT"

@@ -1,0 +1,17 @@
+# Weekly and on demand only (STANDARD.md 1.5). Switch off GitHub's CodeQL "default setup" (Settings -> Code security).
+name: CodeQL
+on:
+  schedule:
+    - cron: "17 3 * * 0"        # Sunday: two hours after this project's weekly CI slot
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  codeql:
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    uses: Legal-Copy7045/project-standards/.github/workflows/codeql.yml@STANDARDS_SHA # v1.0.0
+    with:
+      languages: '["actions", "python", "javascript-typescript"]'

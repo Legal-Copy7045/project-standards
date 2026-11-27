@@ -1,0 +1,3 @@
+# Versions Dependabot doesn't track (STANDARD.md 5): the weekly maintenance session checks each for a newer release.
+# source: pypi:<name> | npm:<name> | github:<owner>/<repo> (release tags) | docker:<image>
+- {name: ESPHome, current: "2026.11.0", source: "pypi:esphome", where: ".github/workflows/ci.yml (ESPHOME_VERSION)"}

@@ -1,0 +1,40 @@
+# This repository's own CI, per its standard: pull requests (not drafts), weekly, by hand.
+name: CI
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+  schedule:
+    - cron: "47 3 * * 0"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  tests:
+    if: github.event_name != 'push' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with: {persist-credentials: false}
+      - run: pip install -q pytest pyyaml && bash tests/run.sh
+  privacy:
+    if: github.event_name != 'push' && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
+    uses: ./.github/workflows/privacy.yml
+  privacy-denylist:
+    if: github.event_name == 'push'
+    uses: ./.github/workflows/privacy.yml
+    with: {denylist: true}
+    secrets: inherit
+  ci-result:
+    if: always() && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
+    needs: [tests, privacy, privacy-denylist]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - env: {RESULTS: "${{ toJSON(needs.*.result) }}"}
+        run: if echo "$RESULTS" | grep -qE '"(failure|cancelled)"'; then exit 1; fi
